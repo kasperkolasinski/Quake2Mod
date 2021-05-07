@@ -626,6 +626,42 @@ void InitClientPersistant (gclient_t *client)
 	client->pers.max_cells		= 200;
 	client->pers.max_slugs		= 50;
 
+	//MOD VARIABLES SET
+	client->pers.lives = 2;
+	client->pers.rounds = 1;
+	client->pers.points = 0;
+	client->pers.lastDamageTimer = 0.0;
+	client->pers.doubletap = false;
+	client->pers.juggernog = false;
+	client->pers.speedcola = false;
+	client->pers.staminup = false;
+	client->pers.scavenger = false;
+	client->pers.scavReset = false;
+	client->pers.buying = false;
+	client->pers.buyTime = 0.0;
+	client->pers.upgrading = false;
+	client->pers.upgradeTime = 0.0;
+
+	client->pers.blasterUpgrade = false;
+	client->pers.shotgunUpgrade = false;
+	client->pers.supershotgunUpgrade = false;
+	client->pers.machineUpgrade = false;
+	client->pers.chainUpgrade = false;
+	client->pers.grenadeUpgrade = false;
+	client->pers.rocketUpgrade = false;
+	client->pers.hyperUpgrade = false;
+	client->pers.railUpgrade = false;
+	client->pers.bfgUpgrade = false;
+
+	client->pers.powerdouble = false;
+	client->pers.powerdoubletime = 0.0;
+	client->pers.nodam = false;
+	client->pers.nodamtime = 0.0;
+	client->pers.instakill = false;
+	client->pers.instakilltime = 0.0;
+	client->pers.firesale = false;
+	client->pers.firesaletime = 0.0;
+
 	client->pers.connected = true;
 }
 
@@ -1577,6 +1613,71 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	level.current_entity = ent;
 	client = ent->client;
 
+	if (client->pers.staminup)
+	{
+		float ClassSpeedModifer, t;
+		vec3_t velo;
+		vec3_t  end, forward, right, up;
+		ClassSpeedModifer = 6 * 0.2;
+		//Figure out speed
+		VectorClear(velo);
+		AngleVectors(ent->client->v_angle, forward, right, up);
+		VectorScale(forward, ucmd->forwardmove*ClassSpeedModifer, end);
+		VectorAdd(end, velo, velo);
+		AngleVectors(ent->client->v_angle, forward, right, up);
+		VectorScale(right, ucmd->sidemove*ClassSpeedModifer, end);
+		VectorAdd(end, velo, velo);
+		//if not in water set it up so they aren't moving up or down when they press forward
+		if (ent->waterlevel == 0)
+			velo[2] = 0;
+		if (ent->waterlevel == 1)//feet are in the water
+		{
+			//Water slows you down or at least I think it should
+			velo[0] *= 0.875;
+			velo[1] *= 0.875;
+			velo[2] *= 0.875;
+			ClassSpeedModifer *= 0.875;
+		}
+		else if (ent->waterlevel == 2)//waist is in the water
+		{
+			//Water slows you down or at least I think it should
+			velo[0] *= 0.75;
+			velo[1] *= 0.75;
+			velo[2] *= 0.75;
+			ClassSpeedModifer *= 0.75;
+		}
+		else if (ent->waterlevel == 3)//whole body is in the water
+		{
+			//Water slows you down or at least I think it should
+			velo[0] *= 0.6;
+			velo[1] *= 0.6;
+			velo[2] *= 0.6;
+			ClassSpeedModifer *= 0.6;
+		}
+		if (ent->groundentity)//add 
+			VectorAdd(velo, ent->velocity, ent->velocity);
+		else if (ent->waterlevel)
+			VectorAdd(velo, ent->velocity, ent->velocity);
+		else
+		{
+			//Allow for a little movement but not as much
+			velo[0] *= 0.25;
+			velo[1] *= 0.25;
+			velo[2] *= 0.25;
+			VectorAdd(velo, ent->velocity, ent->velocity);
+		}
+		//Make sure not going to fast. THis slows down grapple too
+		t = VectorLength(ent->velocity);
+		if (t > 300 * ClassSpeedModifer || t < -300 * ClassSpeedModifer)
+		{
+			VectorScale(ent->velocity, 300 * ClassSpeedModifer / t, ent->velocity);
+		}
+
+		//Set these to 0 so pmove thinks we aren't pressing forward or sideways since we are handling all the player forward and sideways speeds
+		ucmd->forwardmove = 0;
+		ucmd->sidemove = 0;
+	}
+
 	if (level.intermissiontime)
 	{
 		client->ps.pmove.pm_type = PM_FREEZE;
@@ -1695,6 +1796,89 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 
 	}
 
+	//MOD SETUP
+
+	//REGEN
+	if (ent->health >= 0 && ent->health < client->pers.max_health && level.time > client->pers.lastDamageTimer + 3)
+	{
+		ent->health += 1;
+		if (ent->health > client->pers.max_health)
+			ent->health = client->pers.max_health;
+		//gi.centerprintf(ent, "Health: %i", ent->health);
+	}
+	
+	//JUGGERNOG
+	if (!client->pers.juggernog)
+	{
+		client->pers.max_health = 100;
+		if (ent->health > client->pers.max_health)
+			ent->health = client->pers.max_health;
+	}
+
+	//SCAVENGER
+	if (!client->pers.scavenger && client->pers.scavReset)
+	{
+		client->pers.max_bullets = 200;
+		client->pers.max_shells = 100;
+		client->pers.max_rockets = 50;
+		client->pers.max_grenades = 50;
+		client->pers.max_cells = 200;
+		client->pers.max_slugs = 50;
+		client->pers.scavReset = false;
+		gitem_t		*it;
+		for (int i = 0; i<game.num_items; i++)
+		{
+			it = itemlist + i;
+			if (!it->pickup)
+				continue;
+			if (!(it->flags & IT_AMMO))
+				continue;
+			Add_Ammo(ent, it, 1000);
+		}
+	}
+
+	//WAVE SETUP
+	/*
+	if (level.total_monsters == level.killed_monsters)
+	{
+		client->pers.rounds++;
+		edict_t	*nextWave;
+		nextWave = G_Spawn();
+		nextWave->classname = "info_player_deathmatch";
+		ED_CallSpawn(nextWave);
+	}
+	*/
+
+	//HANDLE MOD POWERUPS
+	//DOUBLE POINTS
+	if (level.time > client->pers.powerdoubletime + 15 && client->pers.powerdouble)
+	{
+		client->pers.powerdouble = false;
+		gi.centerprintf(ent, "DOUBLE POINTS DONE");
+	}
+
+	//NO DAMAGE
+	if (level.time > client->pers.nodamtime + 15 && client->pers.nodam)
+	{
+		client->pers.nodam = false;
+		gi.centerprintf(ent, "NO DAMAGE DONE");
+	}
+
+	//INSTA KILL
+	if (level.time > client->pers.instakilltime + 15 && client->pers.instakill)
+	{
+		client->pers.instakill = false;
+		gi.centerprintf(ent, "INSTA KILL DONE");
+	}
+
+	//FIRE SALE
+	if (level.time > client->pers.firesaletime + 15 && client->pers.firesale)
+	{
+		client->pers.firesale = false;
+		gi.centerprintf(ent, "FIRE SALE DONE");
+	}
+
+
 	client->oldbuttons = client->buttons;
 	client->buttons = ucmd->buttons;
 	client->latched_buttons |= client->buttons & ~client->oldbuttons;
@@ -1741,6 +1925,8 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		if (other->inuse && other->client->chase_target == ent)
 			UpdateChaseCam(other);
 	}
+
+
 }
 
 

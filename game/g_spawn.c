@@ -146,13 +146,13 @@ void SP_turret_driver (edict_t *self);
 
 
 spawn_t	spawns[] = {
-	{"item_health", SP_item_health},
-	{"item_health_small", SP_item_health_small},
-	{"item_health_large", SP_item_health_large},
-	{"item_health_mega", SP_item_health_mega},
+	//{"item_health", SP_item_health},
+	//{"item_health_small", SP_item_health_small},
+	//{"item_health_large", SP_item_health_large},
+	//{"item_health_mega", SP_item_health_mega},
 
 	{"info_player_start", SP_info_player_start},
-	{"info_player_deathmatch", SP_info_player_deathmatch},
+	{"info_player_deathmatch", SP_monster_berserk },
 	{"info_player_coop", SP_info_player_coop},
 	{"info_player_intermission", SP_info_player_intermission},
 
@@ -236,6 +236,8 @@ spawn_t	spawns[] = {
 	{"misc_easterchick", SP_misc_easterchick},
 	{"misc_easterchick2", SP_misc_easterchick2},
 
+	//COMMENTED OUT ALL MONSTERS TO AVOID ADDITIONAL SPAWNS
+	/*
 	{"monster_berserk", SP_monster_berserk},
 	{"monster_gladiator", SP_monster_gladiator},
 	{"monster_gunner", SP_monster_gunner},
@@ -260,6 +262,7 @@ spawn_t	spawns[] = {
 	{"monster_jorg", SP_monster_jorg},
 
 	{"monster_commander_body", SP_monster_commander_body},
+	*/
 
 	{"turret_breach", SP_turret_breach},
 	{"turret_base", SP_turret_base},
@@ -288,6 +291,7 @@ void ED_CallSpawn (edict_t *ent)
 	}
 
 	// check item spawn functions
+	/*
 	for (i=0,item=itemlist ; i<game.num_items ; i++,item++)
 	{
 		if (!item->classname)
@@ -298,6 +302,7 @@ void ED_CallSpawn (edict_t *ent)
 			return;
 		}
 	}
+	*/
 
 	// check normal spawn functions
 	for (s=spawns ; s->name ; s++)
@@ -653,6 +658,28 @@ char *single_statusbar =
 "hnum "
 "xv	50 "
 "pic 0 "
+
+// lives
+"	xl	50 "
+"	pic 0 "
+"	xl	72 "
+"	num	1	19 "
+
+// points
+"	xl	50 "
+"	yb	-48 "
+"	pic 22 "
+"	xl	72 "
+"	num	6	20 "
+
+// rounds
+"	xl	50 "
+"	yb	-72 "
+"	pic 21 "
+"	xl	72 "
+"	num	2	18 "
+
+"yb	-24 "
 
 // ammo
 "if 2 "

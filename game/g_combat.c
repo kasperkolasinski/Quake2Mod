@@ -102,6 +102,69 @@ void Killed (edict_t *targ, edict_t *inflictor, edict_t *attacker, int damage, v
 		if (!(targ->monsterinfo.aiflags & AI_GOOD_GUY))
 		{
 			level.killed_monsters++;
+
+			//ADD POINTS AND ABILITIES
+			if (attacker->client)
+			{
+				int pointsTemp;
+				pointsTemp = 100;
+				if (attacker->client->pers.powerdouble)
+					pointsTemp = 200;
+				attacker->client->pers.points += pointsTemp;
+
+				//POWERUP ABILITIES
+				int randomNum;
+				randomNum = crandom()*50.0;
+
+				//DOUBLE POINTS
+				if (randomNum > 45)
+				{
+					attacker->client->pers.powerdouble = true;
+					attacker->client->pers.powerdoubletime = level.time;
+					gi.centerprintf(attacker, "DOUBLE POINTS (15s)");
+				}
+
+				//NO DAMAGE
+				else if (randomNum > 40 && randomNum <= 45)
+				{
+					attacker->client->pers.nodam = true;
+					attacker->client->pers.nodamtime = level.time;
+					gi.centerprintf(attacker, "NO DAMAGE (15s)");
+				}
+				
+				//INSTA KILL
+				else if (randomNum > 35 && randomNum <= 40)
+				{
+					attacker->client->pers.instakill = true;
+					attacker->client->pers.instakilltime = level.time;
+					gi.centerprintf(attacker, "INSTA KILL (15s)");
+				}
+				
+				//MAX AMMO
+				else if (randomNum > 30 && randomNum <= 35)
+				{
+					gitem_t	*it;
+					for (int i = 0; i<game.num_items; i++)
+					{
+						it = itemlist + i;
+						if (!it->pickup)
+							continue;
+						if (!(it->flags & IT_AMMO))
+							continue;
+						Add_Ammo(attacker, it, 1000);
+					}
+					gi.centerprintf(attacker, "MAX AMMO");
+				}
+				
+				//FIRE SALE
+				else if (randomNum > 25 && randomNum <= 30)
+				{
+					attacker->client->pers.firesale = true;
+					attacker->client->pers.firesaletime = level.time;
+					gi.centerprintf(attacker, "FIRE SALE (15s)");
+				}
+			}
+
 			if (coop->value && attacker->client)
 				attacker->client->resp.score++;
 			// medics won't heal monsters that they kill themselves
@@ -491,15 +554,80 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 		else
 			SpawnDamage (te_sparks, point, normal, take);
 
+		//MOD DOUBLE DAMAGE
+		if (!client && attacker->client)
+		{
+			if (attacker->client->pers.doubletap)
+				take *= 2;
+			if (attacker->client->pers.instakill)
+				take = 10000000;
+		}
+		
+		//MONSTERS DEAL 25 DAMAGE
+		if (targ->client)
+		{
+			take = 25;
+			if (targ->client->pers.nodam)
+			{
+				take = 0;
+				return;
+			}
+		}
+		
 
 		targ->health = targ->health - take;
-			
+		
+		//MOD LIVES CHECKER
+		if (client)
+		{
+			client->pers.lastDamageTimer = level.time;
+			if (targ->health <= 0)
+			{
+				if (client->pers.lives <= 0)
+				{
+					if ((targ->svflags & SVF_MONSTER) || (client))
+						targ->flags |= FL_NO_KNOCKBACK;
+					Killed(targ, inflictor, attacker, take, point);
+					return;
+				}
+				else
+				{
+					client->pers.lives--;
+					client->pers.doubletap = false;
+					client->pers.juggernog = false;
+					client->pers.speedcola = false;
+					client->pers.staminup = false;
+					client->pers.scavenger = false;
+					client->pers.scavReset = true;
+					targ->health = client->pers.max_health;
+					return;
+				}
+			}
+		}
+
 		if (targ->health <= 0)
 		{
 			if ((targ->svflags & SVF_MONSTER) || (client))
 				targ->flags |= FL_NO_KNOCKBACK;
-			Killed (targ, inflictor, attacker, take, point);
-			return;
+			Killed(targ, inflictor, attacker, take, point);
+
+			//POWERUP DROP
+
+
+
+
+			/*
+			edict_t	*it_ent;
+			gitem_t	*it;
+			int index;
+			it = FindItem("Body Armor");
+			index = ITEM_INDEX(it);
+			it_ent = G_Spawn();
+			it_ent->classname = it->classname;
+			SpawnItem(it_ent, it);
+			*/
+
+			return;	
 		}
 	}
 

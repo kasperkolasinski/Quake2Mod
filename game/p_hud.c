@@ -386,6 +386,17 @@ void G_SetStats (edict_t *ent)
 	ent->client->ps.stats[STAT_HEALTH_ICON] = level.pic_health;
 	ent->client->ps.stats[STAT_HEALTH] = ent->health;
 
+	// lives
+	ent->client->ps.stats[STAT_LIVES] = ent->client->pers.lives;
+
+	// points
+	ent->client->ps.stats[STAT_POINTS] = ent->client->pers.points;
+	ent->client->ps.stats[STAT_POINTS_ICON] = gi.imageindex("p_quad");
+
+	// rounds
+	ent->client->ps.stats[STAT_ROUNDS] = ent->client->pers.rounds;
+	ent->client->ps.stats[STAT_ROUNDS_ICON] = gi.imageindex("p_invulnerability");
+
 	//
 	// ammo
 	//

@@ -841,6 +841,40 @@ typedef struct
 	int			max_health;
 	int			savedFlags;
 
+	//MOD VARIABLES
+	int			rounds, lives, points;
+	float		lastDamageTimer;
+	qboolean	doubletap;
+	qboolean	juggernog;
+	qboolean	speedcola;
+	qboolean	staminup;
+	qboolean	scavenger;
+	qboolean	scavReset;
+	qboolean	buying;
+	float		buyTime;
+	qboolean	upgrading;
+	float		upgradeTime;
+	qboolean	blasterUpgrade;
+	qboolean	shotgunUpgrade;
+	qboolean	supershotgunUpgrade;
+	qboolean	machineUpgrade;
+	qboolean	chainUpgrade;
+	qboolean	grenadeUpgrade;
+	qboolean	rocketUpgrade;
+	qboolean	hyperUpgrade;
+	qboolean	railUpgrade;
+	qboolean	bfgUpgrade;
+
+	qboolean	powerdouble;
+	float		powerdoubletime;
+	qboolean	nodam;
+	float		nodamtime;
+	qboolean	instakill;
+	float		instakilltime;
+	qboolean	firesale;
+	float		firesaletime;
+
+
 	int			selected_item;
 	int			inventory[MAX_ITEMS];
 

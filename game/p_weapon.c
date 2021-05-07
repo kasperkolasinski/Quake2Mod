@@ -718,6 +718,12 @@ void weapon_grenadelauncher_fire (edict_t *ent)
 	if (is_quad)
 		damage *= 4;
 
+	if (ent->client->pers.grenadeUpgrade)
+	{
+		damage *= 3;
+		radius *= 3;
+	}
+
 	VectorSet(offset, 8, 8, ent->viewheight-8);
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
@@ -742,6 +748,17 @@ void weapon_grenadelauncher_fire (edict_t *ent)
 
 void Weapon_GrenadeLauncher (edict_t *ent)
 {
+	if (ent->client)
+	{
+		if (ent->client->pers.speedcola)
+		{
+			static int	pause_frames[] = { 17, 26, 30, 0 };
+			static int	fire_frames[] = { 3, 0 };
+
+			Weapon_Generic(ent, 2, 8, 30, 32, pause_frames, fire_frames, weapon_grenadelauncher_fire);
+			return;
+		}
+	}
 	static int	pause_frames[]	= {34, 51, 59, 0};
 	static int	fire_frames[]	= {6, 0};
 
@@ -773,6 +790,12 @@ void Weapon_RocketLauncher_Fire (edict_t *ent)
 		radius_damage *= 4;
 	}
 
+	if (ent->client->pers.rocketUpgrade)
+	{
+		damage *= 3;
+		radius_damage *= 3;
+	}
+		
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 
 	VectorScale (forward, -2, ent->client->kick_origin);
@@ -798,6 +821,17 @@ void Weapon_RocketLauncher_Fire (edict_t *ent)
 
 void Weapon_RocketLauncher (edict_t *ent)
 {
+	if (ent->client)
+	{
+		if (ent->client->pers.speedcola)
+		{
+			static int	pause_frames[] = { 13, 17, 21, 25, 0 };
+			static int	fire_frames[] = { 3, 0 };
+
+			Weapon_Generic(ent, 2, 6, 25, 27, pause_frames, fire_frames, Weapon_RocketLauncher_Fire);
+			return;
+		}
+	}
 	static int	pause_frames[]	= {25, 33, 42, 50, 0};
 	static int	fire_frames[]	= {5, 0};
 
@@ -852,12 +886,25 @@ void Weapon_Blaster_Fire (edict_t *ent)
 		damage = 15;
 	else
 		damage = 10;
+	if (ent->client->pers.blasterUpgrade)
+		damage *= 3;
 	Blaster_Fire (ent, vec3_origin, damage, false, EF_BLASTER);
 	ent->client->ps.gunframe++;
 }
 
 void Weapon_Blaster (edict_t *ent)
 {
+	if (ent->client)
+	{
+		if (ent->client->pers.speedcola)
+		{
+			static int	pause_frames[] = {10, 16, 0};
+			static int	fire_frames[] = {3, 0};
+
+			Weapon_Generic(ent, 2, 4, 26, 28, pause_frames, fire_frames, Weapon_Blaster_Fire);
+			return;
+		}
+	}
 	static int	pause_frames[]	= {19, 32, 0};
 	static int	fire_frames[]	= {5, 0};
 
@@ -904,6 +951,8 @@ void Weapon_HyperBlaster_Fire (edict_t *ent)
 				damage = 15;
 			else
 				damage = 20;
+			if (ent->client->pers.hyperUpgrade)
+				damage *= 3;
 			Blaster_Fire (ent, offset, damage, true, effect);
 			if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
 				ent->client->pers.inventory[ent->client->ammo_index]--;
@@ -990,6 +1039,9 @@ void Machinegun_Fire (edict_t *ent)
 		kick *= 4;
 	}
 
+	if (ent->client->pers.machineUpgrade)
+		damage *= 3;
+
 	for (i=1 ; i<3 ; i++)
 	{
 		ent->client->kick_origin[i] = crandom() * 0.35;
@@ -1038,6 +1090,17 @@ void Machinegun_Fire (edict_t *ent)
 
 void Weapon_Machinegun (edict_t *ent)
 {
+	if (ent->client)
+	{
+		if (ent->client->pers.speedcola)
+		{
+			static int	pause_frames[] = { 12, 23, 0 };
+			static int	fire_frames[] = { 2, 3, 0 };
+
+			Weapon_Generic(ent, 1, 3, 23, 25, pause_frames, fire_frames, Machinegun_Fire);
+			return;
+		}
+	}
 	static int	pause_frames[]	= {23, 45, 0};
 	static int	fire_frames[]	= {4, 5, 0};
 
@@ -1133,6 +1196,9 @@ void Chaingun_Fire (edict_t *ent)
 		kick *= 4;
 	}
 
+	if (ent->client->pers.chainUpgrade)
+		damage *= 3;
+
 	for (i=0 ; i<3 ; i++)
 	{
 		ent->client->kick_origin[i] = crandom() * 0.35;
@@ -1209,6 +1275,9 @@ void weapon_shotgun_fire (edict_t *ent)
 		kick *= 4;
 	}
 
+	if (ent->client->pers.shotgunUpgrade)
+		damage *= 3;
+
 	if (deathmatch->value)
 		fire_shotgun (ent, start, forward, damage, kick, 500, 500, DEFAULT_DEATHMATCH_SHOTGUN_COUNT, MOD_SHOTGUN);
 	else
@@ -1229,6 +1298,17 @@ void weapon_shotgun_fire (edict_t *ent)
 
 void Weapon_Shotgun (edict_t *ent)
 {
+	if (ent->client)
+	{
+		if (ent->client->pers.speedcola)
+		{
+			static int	pause_frames[] = { 11, 14, 17, 0 };
+			static int	fire_frames[] = { 4, 5, 0 };
+
+			Weapon_Generic(ent, 3, 9, 18, 20, pause_frames, fire_frames, weapon_shotgun_fire);
+			return;
+		}
+	}
 	static int	pause_frames[]	= {22, 28, 34, 0};
 	static int	fire_frames[]	= {8, 9, 0};
 
@@ -1259,6 +1339,9 @@ void weapon_supershotgun_fire (edict_t *ent)
 		kick *= 4;
 	}
 
+	if (ent->client->pers.supershotgunUpgrade)
+		damage *= 3;
+
 	v[PITCH] = ent->client->v_angle[PITCH];
 	v[YAW]   = ent->client->v_angle[YAW] - 5;
 	v[ROLL]  = ent->client->v_angle[ROLL];
@@ -1283,6 +1366,17 @@ void weapon_supershotgun_fire (edict_t *ent)
 
 void Weapon_SuperShotgun (edict_t *ent)
 {
+	if (ent->client)
+	{
+		if (ent->client->pers.speedcola)
+		{
+			static int	pause_frames[] = { 15, 21, 29, 0 };
+			static int	fire_frames[] = { 4, 0 };
+
+			Weapon_Generic(ent, 3, 9, 29, 31, pause_frames, fire_frames, weapon_supershotgun_fire);
+			return;
+		}
+	}
 	static int	pause_frames[]	= {29, 42, 57, 0};
 	static int	fire_frames[]	= {7, 0};
 
@@ -1324,6 +1418,9 @@ void weapon_railgun_fire (edict_t *ent)
 		kick *= 4;
 	}
 
+	if (ent->client->pers.railUpgrade)
+		damage *= 3;
+
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 
 	VectorScale (forward, -3, ent->client->kick_origin);
@@ -1349,6 +1446,17 @@ void weapon_railgun_fire (edict_t *ent)
 
 void Weapon_Railgun (edict_t *ent)
 {
+	if (ent->client)
+	{
+		if (ent->client->pers.speedcola)
+		{
+			static int	pause_frames[] = { 28, 0 };
+			static int	fire_frames[] = { 2, 0 };
+
+			Weapon_Generic(ent, 1, 9, 28, 31, pause_frames, fire_frames, weapon_railgun_fire);
+			return;
+		}
+	}
 	static int	pause_frames[]	= {56, 0};
 	static int	fire_frames[]	= {4, 0};
 
@@ -1400,6 +1508,9 @@ void weapon_bfg_fire (edict_t *ent)
 
 	if (is_quad)
 		damage *= 4;
+
+	if (ent->client->pers.bfgUpgrade)
+		damage *= 3;
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 

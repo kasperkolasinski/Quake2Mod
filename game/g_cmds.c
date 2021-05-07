@@ -166,6 +166,12 @@ void Cmd_Give_f (edict_t *ent)
 
 	name = gi.args();
 
+	if (Q_stricmp(gi.argv(1), "points") == 0)
+	{
+		ent->client->pers.points += 5000;
+		return;
+	}
+
 	if (Q_stricmp(name, "all") == 0)
 		give_all = true;
 	else
@@ -211,6 +217,7 @@ void Cmd_Give_f (edict_t *ent)
 			return;
 	}
 
+	/*
 	if (give_all || Q_stricmp(name, "armor") == 0)
 	{
 		gitem_armor_t	*info;
@@ -228,6 +235,7 @@ void Cmd_Give_f (edict_t *ent)
 		if (!give_all)
 			return;
 	}
+	
 
 	if (give_all || Q_stricmp(name, "Power Shield") == 0)
 	{
@@ -242,6 +250,7 @@ void Cmd_Give_f (edict_t *ent)
 		if (!give_all)
 			return;
 	}
+	*/
 
 	if (give_all)
 	{
@@ -899,6 +908,441 @@ void Cmd_PlayerList_f(edict_t *ent)
 	gi.cprintf(ent, PRINT_HIGH, "%s", text);
 }
 
+//BUY FUNCTION START
+void Cmd_Buy_Start(edict_t *ent)
+{
+	if (!ent || !ent->client)
+		return;
+	ent->client->pers.buyTime = level.time;
+	ent->client->pers.buying = true;
+	gi.centerprintf(ent, "Choose Weapon/Ammo to Buy: 0-9");
+}
+
+//BUY FUNCTION FOR WEAPONS
+void Cmd_Buy(edict_t *ent)
+{
+	if (!ent || !ent->client)
+		return;
+
+	char		*name;
+	gitem_t		*it;
+	int			index;
+	edict_t		*it_ent;
+	int			points;
+
+	name = gi.args();
+
+	it = FindItem(name);
+	index = ITEM_INDEX(it);
+
+	if (Q_stricmp(name, "machinegun") == 0 || Q_stricmp(name, "shotgun") == 0)
+	{
+		if (ent->client->pers.inventory[index])
+		{
+			points = 250;
+			if (ent->client->pers.firesale)
+				points /= 2;
+			if (ent->client->pers.points >= points)
+			{
+				ent->client->pers.points -= points;
+				it_ent = G_Spawn();
+				it_ent->classname = it->classname;
+				SpawnItem(it_ent, it);
+				Touch_Item(it_ent, ent, NULL, NULL);
+				gi.centerprintf(ent, "(-%i) Purchased Ammo: %s", points, name);
+				if (it_ent->inuse)
+					G_FreeEdict(it_ent);
+				return;
+			}
+			else
+			{
+				gi.centerprintf(ent, "Not Enough Points For Ammo (%i)", points);
+				return;
+			}
+		}
+		else
+		{
+			points = 1000;
+			if (ent->client->pers.firesale)
+				points /= 2;
+			if (ent->client->pers.points >= points)
+			{
+				ent->client->pers.points -= points;
+				it_ent = G_Spawn();
+				it_ent->classname = it->classname;
+				SpawnItem(it_ent, it);
+				Touch_Item(it_ent, ent, NULL, NULL);
+				gi.centerprintf(ent, "(-%i) Purchased: %s", points, name);
+				if (it_ent->inuse)
+					G_FreeEdict(it_ent);
+				return;
+			}
+			else
+			{
+				gi.centerprintf(ent, "Not Enough Points To Purchase (%i)", points);
+				return;
+			}
+		}
+	}
+
+	else if (Q_stricmp(name, "super shotgun") == 0 || Q_stricmp(name, "grenade launcher") == 0)
+	{
+		if (ent->client->pers.inventory[index])
+		{
+			points = 625;
+			if (ent->client->pers.firesale)
+				points /= 2;
+			if (ent->client->pers.points >= points)
+			{
+				ent->client->pers.points -= points;
+				it_ent = G_Spawn();
+				it_ent->classname = it->classname;
+				SpawnItem(it_ent, it);
+				Touch_Item(it_ent, ent, NULL, NULL);
+				gi.centerprintf(ent, "(-%i) Purchased: %s", points, name);
+				if (it_ent->inuse)
+					G_FreeEdict(it_ent);
+				return;
+			}
+			else
+			{
+				gi.centerprintf(ent, "Not Enough Points To Purchase (%i)", points);
+				return;
+			}
+		}
+		else
+		{
+			points = 2500;
+			if (ent->client->pers.firesale)
+				points /= 2;
+			if (ent->client->pers.points >= points)
+			{
+				ent->client->pers.points -= points;
+				it_ent = G_Spawn();
+				it_ent->classname = it->classname;
+				SpawnItem(it_ent, it);
+				Touch_Item(it_ent, ent, NULL, NULL);
+				gi.centerprintf(ent, "(-%i) Purchased: %s", points, name);
+				if (it_ent->inuse)
+					G_FreeEdict(it_ent);
+				return;
+			}
+			else
+			{
+				gi.centerprintf(ent, "Not Enough Points To Purchase (%i)", points);
+				return;
+			}
+		}
+	}
+
+	else if (Q_stricmp(name, "rocket launcher") == 0 || Q_stricmp(name, "hyperblaster") == 0)
+	{
+		if (ent->client->pers.inventory[index])
+		{
+			points = 1000;
+			if (ent->client->pers.firesale)
+				points /= 2;
+			if (ent->client->pers.points >= points)
+			{
+				ent->client->pers.points -= points;
+				it_ent = G_Spawn();
+				it_ent->classname = it->classname;
+				SpawnItem(it_ent, it);
+				Touch_Item(it_ent, ent, NULL, NULL);
+				gi.centerprintf(ent, "(-%i) Purchased: %s", points, name);
+				if (it_ent->inuse)
+					G_FreeEdict(it_ent);
+				return;
+			}
+			else
+			{
+				gi.centerprintf(ent, "Not Enough Points To Purchase (%i)", points);
+				return;
+			}
+		}
+		else
+		{
+			points = 4000;
+			if (ent->client->pers.firesale)
+				points /= 2;
+			if (ent->client->pers.points >= points)
+			{
+				ent->client->pers.points -= points;
+				it_ent = G_Spawn();
+				it_ent->classname = it->classname;
+				SpawnItem(it_ent, it);
+				Touch_Item(it_ent, ent, NULL, NULL);
+				gi.centerprintf(ent, "(-%i) Purchased: %s", points, name);
+				if (it_ent->inuse)
+					G_FreeEdict(it_ent);
+				return;
+			}
+			else
+			{
+				gi.centerprintf(ent, "Not Enough Points To Purchase (%i)", points);
+				return;
+			}
+		}
+	}
+
+	else if (Q_stricmp(name, "chaingun") == 0 || Q_stricmp(name, "railgun") == 0)
+	{
+		if (ent->client->pers.inventory[index])
+		{
+			points = 1875;
+			if (ent->client->pers.firesale)
+				points /= 2;
+			if (ent->client->pers.points >= points)
+			{
+				ent->client->pers.points -= points;
+				it_ent = G_Spawn();
+				it_ent->classname = it->classname;
+				SpawnItem(it_ent, it);
+				Touch_Item(it_ent, ent, NULL, NULL);
+				gi.centerprintf(ent, "(-%i) Purchased: %s", points, name);
+				if (it_ent->inuse)
+					G_FreeEdict(it_ent);
+				return;
+			}
+			else
+			{
+				gi.centerprintf(ent, "Not Enough Points To Purchase (%i)", points);
+				return;
+			}
+		}
+		else
+		{
+			points = 7500;
+			if (ent->client->pers.firesale)
+				points /= 2;
+			if (ent->client->pers.points >= points)
+			{
+				ent->client->pers.points -= points;
+				it_ent = G_Spawn();
+				it_ent->classname = it->classname;
+				SpawnItem(it_ent, it);
+				Touch_Item(it_ent, ent, NULL, NULL);
+				gi.centerprintf(ent, "(-%i) Purchased: %s", points, name);
+				if (it_ent->inuse)
+					G_FreeEdict(it_ent);
+				return;
+			}
+			else
+			{
+				gi.centerprintf(ent, "Not Enough Points To Purchase (%i)", points);
+				return;
+			}
+		}
+	}
+
+	else if (Q_stricmp(name, "bfg10k") == 0)
+	{
+		if (ent->client->pers.inventory[index])
+		{
+			points = 2500;
+			if (ent->client->pers.firesale)
+				points /= 2;
+			if (ent->client->pers.points >= points)
+			{
+				ent->client->pers.points -= points;
+				it_ent = G_Spawn();
+				it_ent->classname = it->classname;
+				SpawnItem(it_ent, it);
+				Touch_Item(it_ent, ent, NULL, NULL);
+				gi.centerprintf(ent, "(-%i) Purchased: %s", points, name);
+				if (it_ent->inuse)
+					G_FreeEdict(it_ent);
+				return;
+			}
+			else
+			{
+				gi.centerprintf(ent, "Not Enough Points To Purchase (%i)", points);
+				return;
+			}
+		}
+		else
+		{
+			points = 10000;
+			if (ent->client->pers.firesale)
+				points /= 2;
+			if (ent->client->pers.points >= points)
+			{
+				ent->client->pers.points -= points;
+				it_ent = G_Spawn();
+				it_ent->classname = it->classname;
+				SpawnItem(it_ent, it);
+				Touch_Item(it_ent, ent, NULL, NULL);
+				gi.centerprintf(ent, "(-%i) Purchased: %s", points, name);
+				if (it_ent->inuse)
+					G_FreeEdict(it_ent);
+				return;
+			}
+			else
+			{
+				gi.centerprintf(ent, "Not Enough Points To Purchase (%i)", points);
+				return;
+			}
+		}
+	}
+}
+
+//UPGRADE FUNCTION START
+void Cmd_Upgrade_Start(edict_t *ent)
+{
+	if (!ent || !ent->client)
+		return;
+	ent->client->pers.upgradeTime = level.time;
+	ent->client->pers.upgrading = true;
+	gi.centerprintf(ent, "Choose Weapon To Upgrade: 0-9");
+}
+
+//UPGRADE FUNCTION FOR WEAPONS
+void Cmd_Upgrade(edict_t *ent)
+{
+	if (!ent || !ent->client)
+		return;
+
+	char		*name;
+	gitem_t		*it;
+	int			index;
+
+	name = gi.args();
+
+	it = FindItem(name);
+	index = ITEM_INDEX(it);
+
+	if (ent->client->pers.inventory[index])
+	{
+		if (ent->client->pers.points >= 5000)
+		{
+			if (Q_stricmp(name, "blaster") == 0)
+			{
+				if (!ent->client->pers.blasterUpgrade)
+					ent->client->pers.blasterUpgrade = true;
+				else
+				{
+					gi.centerprintf(ent, "Weapon Already Upgraded");
+					return;
+				}
+			}
+
+			else if (Q_stricmp(name, "shotgun") == 0)
+			{
+				if (!ent->client->pers.shotgunUpgrade)
+					ent->client->pers.shotgunUpgrade = true;
+				else
+				{
+					gi.centerprintf(ent, "Weapon Already Upgraded");
+					return;
+				}
+			}
+
+			else if (Q_stricmp(name, "super shotgun") == 0)
+			{
+				if (!ent->client->pers.supershotgunUpgrade)
+					ent->client->pers.supershotgunUpgrade = true;
+				else
+				{
+					gi.centerprintf(ent, "Weapon Already Upgraded");
+					return;
+				}
+			}
+
+			else if (Q_stricmp(name, "machinegun") == 0)
+			{
+				if (!ent->client->pers.machineUpgrade)
+					ent->client->pers.machineUpgrade = true;
+				else
+				{
+					gi.centerprintf(ent, "Weapon Already Upgraded");
+					return;
+				}
+			}
+
+			else if (Q_stricmp(name, "grenade launcher") == 0)
+			{
+				if (!ent->client->pers.grenadeUpgrade)
+					ent->client->pers.grenadeUpgrade = true;
+				else
+				{
+					gi.centerprintf(ent, "Weapon Already Upgraded");
+					return;
+				}
+			}
+
+			else if (Q_stricmp(name, "rocket launcher") == 0)
+			{
+				if (!ent->client->pers.rocketUpgrade)
+					ent->client->pers.rocketUpgrade = true;
+				else
+				{
+					gi.centerprintf(ent, "Weapon Already Upgraded");
+					return;
+				}
+			}
+
+			else if (Q_stricmp(name, "chaingun") == 0)
+			{
+				if (!ent->client->pers.chainUpgrade)
+					ent->client->pers.chainUpgrade = true;
+				else
+				{
+					gi.centerprintf(ent, "Weapon Already Upgraded");
+					return;
+				}
+			}
+
+			else if (Q_stricmp(name, "railgun") == 0)
+			{
+				if (!ent->client->pers.railUpgrade)
+					ent->client->pers.railUpgrade = true;
+				else
+				{
+					gi.centerprintf(ent, "Weapon Already Upgraded");
+					return;
+				}
+			}
+
+			else if (Q_stricmp(name, "bfg10k") == 0)
+			{
+				if (!ent->client->pers.bfgUpgrade)
+					ent->client->pers.bfgUpgrade = true;
+				else
+				{
+					gi.centerprintf(ent, "Weapon Already Upgraded");
+					return;
+				}
+			}
+
+			else if (Q_stricmp(name, "hyperblaster") == 0)
+			{
+				if (!ent->client->pers.hyperUpgrade)
+					ent->client->pers.hyperUpgrade = true;
+				else
+				{
+					gi.centerprintf(ent, "Weapon Already Upgraded");
+					return;
+				}	
+			}
+
+			ent->client->pers.points -= 5000;
+			gi.centerprintf(ent, "(-5000) Permanently Upgraded: %s", name);
+			return;
+		}
+		else
+		{
+			gi.centerprintf(ent, "Not Enough Points To Upgrade (5000)");
+			return;
+		}
+	}
+
+	else
+	{
+		gi.centerprintf(ent, "You Do Not Own: %s", name);
+		return;
+	}
+}
+
 
 /*
 =================
@@ -913,6 +1357,32 @@ void ClientCommand (edict_t *ent)
 		return;		// not fully in game yet
 
 	cmd = gi.argv(0);
+
+	if (ent->client->pers.buying)
+	{
+		if (level.time > ent->client->pers.buyTime + 3)
+		{
+			ent->client->pers.buying = false;
+		}
+		else if (Q_stricmp(cmd, "use") == 0)
+		{
+			Cmd_Buy(ent);
+			return;
+		}
+	}
+
+	if (ent->client->pers.upgrading)
+	{
+		if (level.time > ent->client->pers.upgradeTime + 3)
+		{
+			ent->client->pers.upgrading = false;
+		}
+		else if (Q_stricmp(cmd, "use") == 0)
+		{
+			Cmd_Upgrade(ent);
+			return;
+		}
+	}
 
 	if (Q_stricmp (cmd, "players") == 0)
 	{
@@ -943,6 +1413,17 @@ void ClientCommand (edict_t *ent)
 	if (level.intermissiontime)
 		return;
 
+	if (Q_stricmp(cmd, "buy") == 0)
+	{
+		Cmd_Buy_Start(ent);
+		return;
+	}
+	else if (Q_stricmp(cmd, "upgrade") == 0)
+	{
+		Cmd_Upgrade_Start(ent);
+		return;
+	}
+		
 	if (Q_stricmp (cmd, "use") == 0)
 		Cmd_Use_f (ent);
 	else if (Q_stricmp (cmd, "drop") == 0)
@@ -987,6 +1468,116 @@ void ClientCommand (edict_t *ent)
 		Cmd_Wave_f (ent);
 	else if (Q_stricmp(cmd, "playerlist") == 0)
 		Cmd_PlayerList_f(ent);
+
+	//MOD PERKS COMMANDS
+	else if (Q_stricmp(cmd, "juggernog") == 0)
+	{
+		if (!ent->client->pers.juggernog)
+		{
+			if (ent->client->pers.points >= 2500)
+			{
+				ent->client->pers.juggernog = true;
+				ent->client->pers.max_health = 200;
+				ent->health = 200;
+				ent->client->pers.points -= 2500;
+				gi.centerprintf(ent, "Juggernog Acquired: -2500 Points");
+			}
+			else
+				gi.centerprintf(ent, "Not Enough Points (2500)");
+		}
+		else
+			gi.centerprintf(ent, "Already Have Juggernog Perk");
+	}
+
+	else if (Q_stricmp(cmd, "doubletap") == 0)
+	{
+		if (!ent->client->pers.doubletap)
+		{
+			if (ent->client->pers.points >= 2000)
+			{
+				ent->client->pers.doubletap = true;
+				ent->client->pers.points -= 2000;
+				gi.centerprintf(ent, "Double Damage Acquired: -2000 Points");
+			}
+			else
+				gi.centerprintf(ent, "Not Enough Points (2000)");
+		}
+		else
+			gi.centerprintf(ent, "Already Have Doubletap Perk");
+	}
+
+	else if (Q_stricmp(cmd, "speedcola") == 0)
+	{
+		if (!ent->client->pers.speedcola)
+		{
+			if (ent->client->pers.points >= 3000)
+			{
+				ent->client->pers.speedcola = true;
+				ent->client->pers.points -= 3000;
+				gi.centerprintf(ent, "Speed Cola Acquired: -3000 Points");
+			}
+			else
+				gi.centerprintf(ent, "Not Enough Points (3000)");
+		}
+		else
+			gi.centerprintf(ent, "Already Have Speed Cola Perk");
+	}
+
+	else if (Q_stricmp(cmd, "staminup") == 0)
+	{
+		if (!ent->client->pers.staminup)
+		{
+			if (ent->client->pers.points >= 1500)
+			{
+				ent->client->pers.staminup = true;
+				ent->client->pers.points -= 1500;
+				gi.centerprintf(ent, "Staminup Acquired: -1500 Points");
+			}
+			else
+				gi.centerprintf(ent, "Not Enough Points (1500)");
+		}
+		else
+			gi.centerprintf(ent, "Already Have Staminup Perk");
+	}
+
+	else if (Q_stricmp(cmd, "scavenger") == 0)
+	{
+		if (!ent->client->pers.scavenger)
+		{
+			if (ent->client->pers.points >= 1000)
+			{
+				ent->client->pers.scavenger = true;
+				ent->client->pers.max_bullets = 400;
+				ent->client->pers.max_shells = 200;
+				ent->client->pers.max_rockets = 100;
+				ent->client->pers.max_grenades = 100;
+				ent->client->pers.max_cells = 400;
+				ent->client->pers.max_slugs = 100;
+
+				gitem_t		*it;
+				for (int i = 0; i<game.num_items; i++)
+				{
+					it = itemlist + i;
+					if (!it->pickup)
+						continue;
+					if (!(it->flags & IT_AMMO))
+						continue;
+					Add_Ammo(ent, it, 1000);
+				}
+
+				ent->client->pers.points -= 1000;
+				gi.centerprintf(ent, "Scavenger Acquired: -1000 Points");
+			}
+			else
+				gi.centerprintf(ent, "Not Enough Points (1000)");
+		}
+		else
+			gi.centerprintf(ent, "Already Have Scavenger Perk");
+	}
+
+	//MOD WEAPON GIVES
+
+
 	else	// anything that doesn't match a command will be a chat
 		Cmd_Say_f (ent, false, true);
 }
